@@ -2,15 +2,15 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/message');
 
 module.exports = {
-  name: 'تخيل',
-  description: 'إنشاء صورة بناءً على وصف معين.',
+  name: 'gmage',
+  description: 'Generate an image based on a prompt.',
   role: 1,
-  author: 'TILMN.AI',
+  author: 'Mark and GeoDevz69',
   
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: 'يرجى إدخال وصف للصورة.\n\nالاستخدام:\nمثال: تخيل قطة أو كلب'
+        text: 'Please provide a prompt.\n\nUsage:\nExample: gen cat or dog'
       }, pageAccessToken);
       return;
     }
@@ -18,6 +18,7 @@ module.exports = {
     const prompt = args.join(' ');
     const apiUrl = `https://zaikyoo.onrender.com/api/artv1?p=${encodeURIComponent(prompt)}`;
     
+
     try {
       await sendMessage(senderId, {
         attachment: {
@@ -29,9 +30,9 @@ module.exports = {
       }, pageAccessToken);
 
     } catch (error) {
-      console.error('حدث خطأ أثناء إنشاء الصورة:', error);
+      console.error('Error generating image:', error);
       await sendMessage(senderId, {
-        text: 'حدث خطأ أثناء إنشاء الصورة. يرجى المحاولة لاحقًا.'
+        text: 'An error occurred while generating the image. Please try again later.'
       }, pageAccessToken);
     }
   }
