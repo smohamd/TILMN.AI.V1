@@ -42,8 +42,6 @@ module.exports = {
 ┌─────⚙️⋆
 │  المبدع: TILMN.AI
 │  العمر: 18 سنة
-│  الحالة: مشغول بابتكار العجائب
-│  الهواية: التميز الجزائري
 └────────────`;
       return sendMessage(senderId, { text: helpTextMessage }, pageAccessToken);
     }
