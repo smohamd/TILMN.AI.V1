@@ -22,8 +22,7 @@
     "request": "^2.88.2",
     "vercel": "^34.2.7",
     "winston": "^3.13.0",
-    "ytdl-core": "^4.11.5", 
-    "yt-search": "^2.10.1"
+    "gtts": "^2.2.0" 
   },
   "engines": {
     "node": "20.x"
