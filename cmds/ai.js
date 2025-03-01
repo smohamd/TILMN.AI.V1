@@ -121,7 +121,7 @@ module.exports = {
       });
 
       // إضافة التوقيع في نهاية الرد
-      const botResponse = data.gpt + "\n\n༺ཌ༈🤖 TILMN V 1 ⚙️ ༈ད༻";
+      const botResponse = data.gpt + "\n\n\n༺ཌ༈ 🤖 TILMN V 1 ⚙️ ༈ད༻";
       sendLongMessage(bot, botResponse, authToken);
     } catch (error) {
       console.error("❌ خطأ أثناء طلب GPT:", error);
