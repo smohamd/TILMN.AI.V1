@@ -5,7 +5,7 @@ console.log("sendMessage function:", sendMessage);
 
 module.exports = {
   name: "تحويل",
-  description: "تحويل النص إلى صوت أو صورة",
+  description: "تحت صيانة ⚙️",
   role: 1,
   author: "developer",
 
@@ -14,7 +14,7 @@ module.exports = {
 
     if (!prompt) {
       return sendMessage(senderId, {
-        text: `الاستخدام: \n\n• تحويل النص إلى صوت: say [النص]\n• تحويل النص إلى صورة: img [النص]`
+        text: `⚙️ تحت صيانة`
       }, pageAccessToken);
     }
 
