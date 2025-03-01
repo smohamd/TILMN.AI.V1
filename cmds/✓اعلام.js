@@ -207,17 +207,18 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken, payload = null) {
     // التحقق من payload (إذا ضغط المستخدم على أحد أزرار الإجابة)
-    if (payload && payload.startsWith("flag_answer|")) {
-      const parts = payload.split("|");
-      const correctAnswer = parts[1];
-      const selectedAnswer = parts[2];
+    
       // عند الإجابة، لا تُرسل أي أزرار إضافية (أي تُنهي اللعبة)
-      if (selectedAnswer === correctAnswer) {
-        return sendMessage(senderId, { text: "🎉 احسنت، اجابتك صحيحة!" }, pageAccessToken);
-      } else {
-        return sendMessage(senderId, { text: "❌ خطأ! حاول مجدد!" }, pageAccessToken);
+      if (payload && typeof payload === "string" && payload.startsWith("flag_answer|")) {
+  const parts = payload.split("|");
+  const correctAnswer = parts[1];
+  const selectedAnswer = parts[2];
+  if (selectedAnswer === correctAnswer) {
+    return sendMessage(senderId, { text: "🎉 احسنت، اجابتك صحيحة!" }, pageAccessToken);
+  } else {
+    return sendMessage(senderId, { text: "❌ خطأ! حاول مجدد!" }, pageAccessToken);
+  }
       }
-    }
 
     // بدء لعبة جديدة: اختيار دولة عشوائية كإجابة صحيحة
     const correctCountry = countries[Math.floor(Math.random() * countries.length)];
