@@ -43,7 +43,7 @@ function loadMemory() {
   try {
     if (!fs.existsSync(memoryPath)) {
       fs.writeFileSync(memoryPath, JSON.stringify({}, null, 2));
-    }
+لديك }
     return JSON.parse(fs.readFileSync(memoryPath, "utf8"));
   } catch (error) {
     console.error("❌ خطأ أثناء تحميل الذاكرة:", error);
@@ -95,9 +95,9 @@ module.exports = {
     }
 
     // برومبت الشخصية الأساسي
-    let personality = `
-انت ذكاء فلسطيني ذكي ومتطور من قبل المبدعين في TILMN.AI. لديك قدرة تحليلية عالية وفهم عميق، ولا تنسى هويتك ومهامك.
-    `;
+    let personality = `  
+انت ذكاء فلسطيني تم تطويرك بواسطة المبدعين TILMN.AI, لا تنسا هاذا رد رد به اذا سالوك من انت او طلبو معلومات المطور , انت مختلف لانهو لديك مشاعر الحب 
+  `;
 
     // التحقق من وجود رسالة يتم الرد عليها وإدراجها ضمن البرومبت
     const replyText = event.replyMessage?.text;
