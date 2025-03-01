@@ -41,7 +41,7 @@ async function playMusic(senderId, videoUrl, pageAccessToken) {
   try {
     const stream = ytdl(videoUrl, { filter: "audioonly" });
     const fileName = `${senderId}.mp3`;
-    const filePath = __dirname + `/cache/${fileName}`;
+    const filePath = __dirname + `/DB/${fileName}`;
 
     stream.pipe(fs.createWriteStream(filePath));
 
