@@ -21,8 +21,7 @@
     "nodemailer": "^6.9.13",
     "request": "^2.88.2",
     "vercel": "^34.2.7",
-    "winston": "^3.13.0",
-    "gtts": "^2.2.0" 
+    "winston": "^3.13.0"
   },
   "engines": {
     "node": "20.x"
