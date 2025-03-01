@@ -7,7 +7,7 @@ const { sendMessage } = require("../handles/message");
 module.exports = {
   name: "شغلي",
   description: "قم بتشغيل الأغنية التي تحب",
-  role: 0,
+  role: 1,
   author: "MOHAMED X ZINO",
 
   async execute(senderId, args, pageAccessToken) {
