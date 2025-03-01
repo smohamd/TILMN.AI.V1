@@ -202,7 +202,7 @@ const countries = [
 module.exports = {
   name: "اعلام",
   description: "لعبة تخمين اسم الدولة من خلال صورة العلم باستخدام أزرار اقتراح",
-  role: 0,
+  role: 1,
   author: "MOHAMED X ZINO",
 
   async execute(senderId, args, pageAccessToken, payload = null) {
