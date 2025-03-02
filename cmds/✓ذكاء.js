@@ -33,7 +33,7 @@ async function sendRequest(prompt) {
     userId: "#/chat/1735674979151",
     network: true,
     system: "أنت TILMN.AI، بوت فلسطيني ذكي تم تصميمه لمساعدة المستخدمين في الإجابة على الأسئلة وتقديم المعلومات المفيدة.",
-    withoutContext: true,  // إزالة حفظ الذاكرة
+    withoutContext: false,  // إزالة حفظ الذاكرة
     stream: false
   };
 
