@@ -3,8 +3,8 @@ const { sendMessage } = require('../handles/message');
 
 module.exports = {
   name: "ذكاء",
-  description: "دردشة مع نيرو بدون حفظ الذاكرة، مع برومبت نظامي",
-  role: 0,
+  description: "دردشة مع GPT 4",
+  role: 1,
   author: "𝗬 𝗔 𝗦 𝗦 𝗜 𝗡 𝗘　ツ",
 
   execute: async function(senderId, args, pageAccessToken, payload = null) {
