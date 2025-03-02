@@ -1,13 +1,30 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/message');
 
-module.exports.config = {
+module.exports = {
   name: "ذكاء",
   description: "دردشة مع نيرو بدون حفظ الذاكرة، مع برومبت نظامي",
   role: 0,
-  credits: "𝗬 𝗔 𝗦 𝗦 𝗜 𝗡 𝗘　ツ",
-  usages: "[السؤال]",
-  cooldowns: 5
+  author: "𝗬 𝗔 𝗦 𝗦 𝗜 𝗡 𝗘　ツ",
+
+  execute: async function(senderId, args, pageAccessToken, payload = null) {
+    const prompt = args.join(" ");
+    if (!prompt) {
+      return sendMessage(senderId, { text: "❌ يرجى إدخال سؤال للاستفسار." }, pageAccessToken);
+    }
+    
+    try {
+      const response = await sendRequest(prompt);
+      console.log(response);
+      if (response) {
+        return sendMessage(senderId, { text: `✅ 𝐆𝐏𝐓-4 : ${response}` }, pageAccessToken);
+      } else {
+        return sendMessage(senderId, { text: "🚫 خطأ من الخادم، يرجى المحاولة لاحقًا." }, pageAccessToken);
+      }
+    } catch (error) {
+      return sendMessage(senderId, { text: `❌ خطأ: ${error.message}` }, pageAccessToken);
+    }
+  }
 };
 
 async function sendRequest(prompt) {
@@ -16,7 +33,7 @@ async function sendRequest(prompt) {
     userId: "#/chat/1735674979151",
     network: true,
     system: "أنت TILMN.AI، بوت فلسطيني ذكي تم تصميمه لمساعدة المستخدمين في الإجابة على الأسئلة وتقديم المعلومات المفيدة.",
-    withoutContext: false,  // إزالة حفظ الذاكرة
+    withoutContext: true,  // إزالة حفظ الذاكرة
     stream: false
   };
 
@@ -44,25 +61,4 @@ async function sendRequest(prompt) {
   } catch (error) {
     throw new Error(error.response?.data?.message || error.message);
   }
-}
-
-module.exports.execute = async (senderId, args, pageAccessToken) => {
-  const prompt = args.join(" ");
-  
-  if (!prompt) {
-    return sendMessage(senderId, { text: "❌ يرجى إدخال سؤال للاستفسار." }, pageAccessToken);
-  }
-  
-  try {
-    const response = await sendRequest(prompt);
-    console.log(response);
-    
-    if (response) {
-      return sendMessage(senderId, { text: `✅ 𝐆𝐏𝐓-4 : ${response}` }, pageAccessToken);
-    } else {
-      return sendMessage(senderId, { text: "🚫 خطأ من الخادم، يرجى المحاولة لاحقًا." }, pageAccessToken);
     }
-  } catch (error) {
-    return sendMessage(senderId, { text: `❌ خطأ: ${error.message}` }, pageAccessToken);
-  }
-};
