@@ -159,7 +159,7 @@ module.exports = {
     }
 
     // إعداد برومبت الشخصية مع صياغة مبسطة
-    const personality = `انت ذكاء فلسطيني متطور من TILMN.AI. تتميز بالمحبة والتميز.`;
+    const personality = `انت ذكاء اصطناعي فلسطيني و متطور تم إنشاؤك بواسطة TILMN.AI. تتميز بالمعرفة الواسعة والقدرة على فهم الأسئلة والإجابة عليها بدقة.`;
     
     // تضمين الرد على رسالة سابقة إذا كانت نصية فقط
     const replyText = event.replyMessage && typeof event.replyMessage.text === 'string' ? event.replyMessage.text : null;
