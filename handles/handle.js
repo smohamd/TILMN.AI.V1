@@ -16,33 +16,33 @@ for (const file of commandFiles) {
 
 async function handleMessage(event, pageAccessToken) {
     if (!event?.sender?.id) {
-        console.error('Invalid event object: Missing sender ID.');
+        console.error('Invalid event object: Missing sender ID.', JSON.stringify(event, null, 2));
         return;
     }
 
-    const senderId = event.sender.id;
+    const senderId = event.sender.id.toString().trim();
+    console.log(`Received message from user: ${senderId}`);
 
     // التحقق أولاً من وجود زر (Quick Reply)
     if (event.message?.quick_reply) {
         const payload = event.message.quick_reply.payload;
         console.log(`Received quick reply payload: ${payload}`);
-        // إذا كان الـ payload يبدأ بـ "صور_" نفترض أنها مرتبطة بأمر "صور"
+
         if (payload.startsWith("صور_")) {
             const command = commands.get("صور");
             if (command) {
                 try {
-                    // هنا يتم تمرير payload كمعامل رابع، دون الحاجة لقراءة نص البحث
                     await command.execute(senderId, [], pageAccessToken, payload);
                 } catch (error) {
                     console.error(`Error executing command "صور" with payload:`, error);
-                    sendMessage(senderId, { text: 'There was an error executing that command.' }, pageAccessToken);
+                    sendMessage(senderId, { text: 'حدث خطأ أثناء تنفيذ الأمر.' }, pageAccessToken);
                 }
-                return; // انتهينا من معالجة الرسالة
+                return;
             }
         }
     }
 
-    // إذا لم توجد رسالة زر، ننفذ نفس منطق النسخة القديمة
+    // معالجة النصوص العادية
     if (event.message?.text) {
         const messageText = event.message.text.trim();
         console.log(`Received message: ${messageText}`);
@@ -57,7 +57,7 @@ async function handleMessage(event, pageAccessToken) {
             const command = commands.get(commandName);
 
             if (command.role === 0 && !config.adminId.includes(senderId)) {
-                sendMessage(senderId, { text: 'You are not authorized to use this command.' }, pageAccessToken);
+                sendMessage(senderId, { text: 'ليس لديك الصلاحية لاستخدام هذا الأمر.' }, pageAccessToken);
                 return;
             }
 
@@ -78,7 +78,7 @@ async function handleMessage(event, pageAccessToken) {
                 await command.execute(senderId, args, pageAccessToken, event, imageUrl);
             } catch (error) {
                 console.error(`Error executing command "${commandName}":`, error);
-                sendMessage(senderId, { text: 'There was an error executing that command.' }, pageAccessToken);
+                sendMessage(senderId, { text: 'حدث خطأ أثناء تنفيذ الأمر.' }, pageAccessToken);
             }
         } else {
             const defaultCommand = commands.get('ai');
@@ -87,10 +87,10 @@ async function handleMessage(event, pageAccessToken) {
                     await defaultCommand.execute(senderId, [messageText], pageAccessToken, event);
                 } catch (error) {
                     console.error('Error executing default "ai" command:', error);
-                    sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
+                    sendMessage(senderId, { text: 'حدث خطأ أثناء معالجة طلبك.' }, pageAccessToken);
                 }
             } else {
-                sendMessage(senderId, { text: "Sorry, I couldn't understand that. Please try again." }, pageAccessToken);
+                sendMessage(senderId, { text: "لم أفهم ذلك. حاول مرة أخرى." }, pageAccessToken);
             }
         }
     } else {
