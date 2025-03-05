@@ -11,51 +11,15 @@ const config = {
   maxMessageLength: 2000,
   delayBetweenMessages: 1000, // بالمللي ثانية
   maxRetryCount: 2,
-  memoryLimit: 20 // الحد الأقصى للرسائل المخزنة لكل مستخدم
+  memoryLimit: 20 // الحد الأقصى لعدد الرسائل في الذاكرة قبل الحذف
 };
 
-// قائمة الردود الثابتة
+// مصفوفة الردود الثابتة
 const mappings = [
-  { question: "ما هو tilmn", type: 2, reply: "TILMN هو مشروع يستخدم الذكاء الاصطناعي لتحسين التفاعل مع المستخدمين." },
-  { question: "اخرائيل", type: 2, reply: "تحيا فلسطين 🇵🇸, حرة 💪" },
-  { question: "اسرائيل", type: 2, reply: "تحيا فلسطين 🇵🇸, حرة 💪" }
+  { question: "اخرائيل", type: 2, reply: "تحيا فلسطين 🇵🇸, حرة 💪\n\n༺ཌ༈🤖 TILMN V 1 ⚙️ ༈ད༻" },
+  { question: "اسرائيل", type: 2, reply: "تحيا فلسطين 🇵🇸, حرة 💪\n\n༺ཌ༈🤖 TILMN V 1 ⚙️ ༈ད༻" }
 ];
 
-// تحميل الذاكرة من الملف
-async function loadMemory() {
-  try {
-    await fs.access(memoryPath);
-  } catch {
-    await fs.writeFile(memoryPath, JSON.stringify({}, null, 2));
-  }
-
-  try {
-    const data = await fs.readFile(memoryPath, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("❌ خطأ أثناء تحميل الذاكرة:", error);
-    return {};
-  }
-}
-
-// حفظ الذاكرة
-async function saveMemory(memory) {
-  try {
-    await fs.writeFile(memoryPath, JSON.stringify(memory, null, 2));
-  } catch (error) {
-    console.error("❌ خطأ أثناء حفظ الذاكرة:", error);
-  }
-}
-
-// حذف ذاكرة مستخدم معين
-async function clearUserMemory(memory, senderId) {
-  if (memory[senderId]) {
-    memory[senderId] = [];
-    await saveMemory(memory);
-  }
-}
-
-// البحث عن رد ثابت في القائمة
 function getMappingReply(message) {
   const lowerMsg = message.trim().toLowerCase();
   const normalizedMsg = lowerMsg.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()؟]/g, "").trim();
@@ -70,20 +34,32 @@ function getMappingReply(message) {
   return null;
 }
 
-// إرسال رسالة طويلة مقسمة
-function sendLongMessage(bot, text, authToken) {
-  if (text.length > config.maxMessageLength) {
-    const messages = text.match(new RegExp(`.{1,${config.maxMessageLength}}`, "g"));
-    sendMessage(bot, { text: messages[0] }, authToken);
-    messages.slice(1).forEach((msg, index) => {
-      setTimeout(() => sendMessage(bot, { text: msg }, authToken), (index + 1) * config.delayBetweenMessages);
-    });
-  } else {
-    sendMessage(bot, { text }, authToken);
+// تحميل الذاكرة
+async function loadMemory() {
+  try {
+    await fs.access(memoryPath);
+  } catch (err) {
+    await fs.writeFile(memoryPath, JSON.stringify({}, null, 2));
+  }
+
+  try {
+    const data = await fs.readFile(memoryPath, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("❌ خطأ أثناء تحميل الذاكرة:", error);
+    return {};
   }
 }
 
-// دالة استدعاء GPT مع محاولات إعادة
+async function saveMemory(memory) {
+  try {
+    await fs.writeFile(memoryPath, JSON.stringify(memory, null, 2));
+  } catch (error) {
+    console.error("❌ خطأ أثناء حفظ الذاكرة:", error);
+  }
+}
+
+// دالة طلب GPT مع البرومبت الجديد
 async function attemptGPT(memoryMessages, prompt, retryCount) {
   try {
     const data = await gpt.v1({
@@ -97,7 +73,7 @@ async function attemptGPT(memoryMessages, prompt, retryCount) {
     console.error("❌ خطأ أثناء طلب GPT:", error);
     if (retryCount > 0) {
       console.log(`إعادة محاولة الاتصال بـ GPT... المتبقي: ${retryCount}`);
-      memoryMessages.pop(); // إزالة آخر رسالة عند الفشل
+      memoryMessages.pop();
       return await attemptGPT(memoryMessages, prompt, retryCount - 1);
     } else {
       throw error;
@@ -105,7 +81,23 @@ async function attemptGPT(memoryMessages, prompt, retryCount) {
   }
 }
 
-// تنفيذ الأمر عند تلقي رسالة
+function splitMessageIntoChunks(message, chunkSize) {
+  const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+  return message.match(regex);
+}
+
+function sendLongMessage(bot, text, authToken) {
+  if (text.length > config.maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, config.maxMessageLength);
+    sendMessage(bot, { text: messages[0] }, authToken);
+    messages.slice(1).forEach((msg, index) => {
+      setTimeout(() => sendMessage(bot, { text: msg }, authToken), (index + 1) * config.delayBetweenMessages);
+    });
+  } else {
+    sendMessage(bot, { text }, authToken);
+  }
+}
+
 module.exports = {
   name: "ai",
   description: "🤖 بدون استخدام أمر، أرسل رسالة فقط",
@@ -119,18 +111,23 @@ module.exports = {
     }
     const senderId = event.sender.id;
 
-    // تجاهل الرسائل التي تحتوي على مرفقات غير نصية
-    if (event.attachments && event.attachments.some(att => ["image", "audio", "voice"].includes(att.type))) {
-      console.log("تم تجاهل المرفقات غير النصية.");
-      return;
+    if (event.attachments && Array.isArray(event.attachments)) {
+      const ignoredTypes = ["image", "audio", "voice"];
+      if (event.attachments.some(att => ignoredTypes.includes(att.type))) {
+        console.log("تم تجاهل المرفقات غير النصية.");
+        return;
+      }
     }
 
     const userMessage = args.join(" ").trim();
     if (!userMessage) {
-      return sendMessage(bot, { text: "🤖 ¦ اكتب سؤالاً وسأجيبك" }, authToken);
+      return sendMessage(
+        bot,
+        { text: "🤖 ¦ اكتب سؤالاً وسأجيبك\n༺ཌ༈🤖 TILMN V 1 ⚙️ ༈ད༻" },
+        authToken
+      );
     }
 
-    // التحقق من وجود رد ثابت
     const mappingReply = getMappingReply(userMessage);
     if (mappingReply) {
       return sendMessage(bot, { text: mappingReply }, authToken);
@@ -141,30 +138,36 @@ module.exports = {
       memory[senderId] = [];
     }
 
-    // تنظيف الذاكرة إذا امتلأت
     if (memory[senderId].length >= config.memoryLimit) {
-      console.log("ذاكرة المستخدم ممتلئة. سيتم حذف الذاكرة وإعادة إرسال السؤال.");
-      await clearUserMemory(memory, senderId);
+      memory[senderId] = [];
+      await saveMemory(memory);
     }
 
-    // تحضير البرومبت الشخصي باستخدام النص المطلوب
-    const personality = `انا ذكاء فلسطيني تم تطويري بواسطة المبدعين TILMN AI`;
-    const replyText = event.replyMessage?.text ? `المستخدم رداً على: "${event.replyMessage.text}"\n\n` : "";
-    const prompt = `${personality}\n\n${replyText}المستخدم: ${userMessage}`;
+    // 🔹 **تعديل البرومبت ليعكس شخصية البوت**
+    const personality = "أنت ذكاء اصطناعي فلسطيني تم تطويرك بواسطة المبدعين TILMN AI. دورك هو الرد على المستخدمين بطريقة ذكية ومتعاونة.";
+    
+    const replyText = event.replyMessage && typeof event.replyMessage.text === 'string' ? event.replyMessage.text : null;
+    let prompt = `${personality}\n\n`;
+    if (replyText) {
+      prompt += `المستخدم ردًا على:\n"${replyText}"\n\n`;
+    }
+    prompt += `المستخدم: ${userMessage}`;
 
-    // حفظ رسالة المستخدم
     memory[senderId].push({ role: "user", content: userMessage });
     await saveMemory(memory);
 
     try {
-      // استدعاء GPT
       const gptResponse = await attemptGPT(memory[senderId], prompt, config.maxRetryCount);
-      const botResponse = `${gptResponse}\n\n🤖 مساعدك الذكي هنا لمساعدتك!`;
+      const botResponse = `${gptResponse}\n\n\n༺ཌ༈ 🤖 TILMN V 1 ⚙️ ༈ད༻`;
       sendLongMessage(bot, botResponse, authToken);
     } catch (error) {
-      console.error("❌ فشل الاتصال بـ GPT. سيتم حذف الذاكرة وإعادة المحاولة:", senderId);
-      await clearUserMemory(memory, senderId);
-      sendMessage(bot, { text: "⚠️ حدث خطأ أثناء الاتصال بـ GPT. يرجى إعادة إرسال السؤال." }, authToken);
+      console.error("❌ فشل الاتصال بـ GPT:", senderId);
+      await saveMemory(memory);
+      sendMessage(
+        bot,
+        { text: "⚠️ حدث خطأ أثناء الاتصال بـ GPT. يرجى إعادة إرسال السؤال." },
+        authToken
+      );
     }
   }
 };
