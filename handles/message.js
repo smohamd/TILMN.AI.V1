@@ -1,52 +1,28 @@
-const request = require('request');
 const axios = require('axios');
 
-async function typingIndicator(senderId, pageAccessToken) {
-    if (!senderId) {
-        console.error('Invalid senderId for typing indicator.');
+async function sendMessage(senderId, message, pageAccessToken) {
+    if (!senderId || senderId.length < 10) {
+        console.error(`❌ معرف المستخدم غير صالح: ${senderId}`);
         return;
     }
 
     try {
-        await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
+        console.log(`📤 إرسال رسالة إلى: ${senderId}`);
+        const response = await axios.post(`https://graph.facebook.com/v21.0/me/messages`, {
             recipient: { id: senderId },
-            sender_action: 'typing_on',
+            message
         }, {
-            params: { access_token: pageAccessToken },
+            params: { access_token: pageAccessToken }
         });
+
+        console.log("✅ تم إرسال الرسالة بنجاح:", response.data);
     } catch (error) {
-        console.error('Error sending typing indicator:', error.response?.data || error.message);
-    }
-}
-
-function sendMessage(senderId, message, pageAccessToken) {
-    if (!message || (!message.text && !message.attachment)) {
-        console.error("Message must contain 'text' or 'attachment'.");
-        return;
-    }
-
-    typingIndicator(senderId, pageAccessToken);
-
-    const requestData = {
-        recipient: { id: senderId },
-        message,
-    };
-
-    request.post(
-        {
-            url: `https://graph.facebook.com/v13.0/me/messages`,
-            qs: { access_token: pageAccessToken },
-            json: requestData,
-        },
-        (error, response, body) => {
-            if (error) {
-                console.error('Error sending message:', error);
-            } else {
-                console.log('Message sent successfully:', body);
-            }
+        if (error.response?.data?.code === 100 && error.response?.data?.error_subcode === 2018001) {
+            console.warn(`⚠️ المستخدم ${senderId} غير موجود أو لم يبدأ محادثة مع البوت.`);
+        } else {
+            console.error("❌ خطأ أثناء إرسال الرسالة:", error.response?.data || error.message);
         }
-    );
+    }
 }
 
 module.exports = { sendMessage };
-
