@@ -30,7 +30,7 @@ module.exports = {
 async function sendRequest(prompt) {
   const data = {
     prompt: prompt,
-    userId: "#/chat/1735674979151",
+    userId: "#/chat/1741282764981",
     network: true,
     system: "أنت TILMN.AI، بوت فلسطيني ذكي تم تصميمه لمساعدة المستخدمين في الإجابة على الأسئلة وتقديم المعلومات المفيدة.",
     withoutContext: false,  // إزالة حفظ الذاكرة
