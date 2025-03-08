@@ -11,7 +11,7 @@ const config = {
   maxMessageLength: 2000,
   delayBetweenMessages: 1000, // بالمللي ثانية
   maxRetryCount: 2,
-  memoryLimit: 20 // الحد الأقصى لعدد الرسائل في الذاكرة قبل الحذف
+  memoryLimit: 5 // الحد الأقصى لعدد الرسائل في الذاكرة قبل الحذف
 };
 
 // مصفوفة الردود الثابتة
